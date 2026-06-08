@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Texas Informative — Production Deployment Plan</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Sora:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg: #0f1216;
+    --panel: #161b22;
+    --panel-2: #1c232d;
+    --border: #2a323d;
+    --ink: #e6edf3;
+    --muted: #8b98a5;
+    --accent: #d98c2b;       /* texas burnt-orange */
+    --accent-2: #3fae6e;     /* done green */
+    --danger: #e05252;
+    --code-bg: #0b0e12;
+    --code-ink: #cdd6e0;
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background:
+      radial-gradient(900px 500px at 12% -8%, rgba(217,140,43,0.10), transparent 60%),
+      radial-gradient(800px 600px at 100% 0%, rgba(63,174,110,0.06), transparent 55%),
+      var(--bg);
+    color: var(--ink);
+    font-family: 'Sora', sans-serif;
+    line-height: 1.6;
+    padding: 0 0 80px;
+  }
+
+  header.top {
+    border-bottom: 1px solid var(--border);
+    background: rgba(15,18,22,0.85);
+    backdrop-filter: blur(8px);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 24px; }
+
+  .head-inner { padding: 22px 24px 18px; max-width: 980px; margin: 0 auto; }
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px; letter-spacing: 2.5px; text-transform: uppercase;
+    color: var(--accent); margin: 0 0 6px;
+  }
+  h1 { font-size: 26px; margin: 0; font-weight: 700; letter-spacing: -0.3px; }
+  .sub { color: var(--muted); font-size: 14px; margin-top: 4px; }
+
+  .progress-row { display: flex; align-items: center; gap: 14px; margin-top: 16px; }
+  .bar { flex: 1; height: 8px; background: var(--panel-2); border-radius: 999px; overflow: hidden; border: 1px solid var(--border); }
+  .bar > i { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); transition: width .35s ease; }
+  .pct { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--muted); min-width: 92px; text-align: right; }
+  .reset { background: transparent; border: 1px solid var(--border); color: var(--muted); font-family:'IBM Plex Mono',monospace; font-size:12px; padding: 6px 12px; border-radius: 8px; cursor: pointer; }
+  .reset:hover { border-color: var(--danger); color: var(--danger); }
+
+  main { margin-top: 30px; }
+
+  .note {
+    border: 1px solid var(--border); border-left: 3px solid var(--accent);
+    background: var(--panel); border-radius: var(--radius);
+    padding: 14px 18px; margin: 0 0 26px; font-size: 14px; color: var(--muted);
+  }
+  .note b { color: var(--ink); }
+
+  .step {
+    border: 1px solid var(--border); background: var(--panel);
+    border-radius: var(--radius); margin-bottom: 16px; overflow: hidden;
+    transition: border-color .2s;
+  }
+  .step.done { border-color: rgba(63,174,110,0.5); }
+  .step-head {
+    display: flex; align-items: center; gap: 14px; padding: 16px 18px; cursor: pointer;
+    user-select: none;
+  }
+  .step-num {
+    font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 13px;
+    min-width: 34px; height: 34px; border-radius: 8px; display: grid; place-items: center;
+    background: var(--panel-2); border: 1px solid var(--border); color: var(--accent);
+  }
+  .step.done .step-num { color: var(--accent-2); border-color: rgba(63,174,110,0.5); }
+  .step-title { font-weight: 600; font-size: 16px; flex: 1; }
+  .step-meta { font-family:'IBM Plex Mono',monospace; font-size: 12px; color: var(--muted); }
+  .chev { color: var(--muted); transition: transform .2s; }
+  .step.open .chev { transform: rotate(90deg); }
+
+  .step-body { padding: 0 18px; max-height: 0; overflow: hidden; transition: max-height .3s ease, padding .3s ease; }
+  .step.open .step-body { max-height: 6000px; padding: 4px 18px 20px; }
+
+  ul.tasks { list-style: none; margin: 8px 0 0; padding: 0; }
+  ul.tasks li { display: flex; gap: 12px; padding: 9px 0; border-top: 1px dashed var(--border); align-items: flex-start; }
+  ul.tasks li:first-child { border-top: none; }
+  ul.tasks input[type=checkbox] { margin-top: 4px; width: 17px; height: 17px; accent-color: var(--accent-2); cursor: pointer; flex-shrink: 0; }
+  ul.tasks label { font-size: 14.5px; cursor: pointer; }
+  ul.tasks label .mono { font-family:'IBM Plex Mono',monospace; font-size: 13px; color: var(--accent); background: var(--panel-2); padding: 1px 6px; border-radius: 5px; }
+  .done-label { color: var(--muted); text-decoration: line-through; }
+
+  .tag { display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:11px; padding:2px 8px; border-radius:6px; border:1px solid var(--border); color:var(--muted); margin-left:6px; }
+  .tag.sql { color:#7fb4ff; border-color:rgba(127,180,255,.4); }
+  .tag.danger { color:var(--danger); border-color:rgba(224,82,82,.4); }
+
+  .codeblock { position: relative; margin: 14px 0 4px; }
+  .codeblock .cap { font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+  pre {
+    background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px;
+    color: var(--code-ink); padding: 14px 16px; overflow-x: auto;
+    font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; line-height: 1.55; margin: 0;
+  }
+  .copy { position:absolute; top: 28px; right: 10px; background: var(--panel-2); border:1px solid var(--border); color:var(--muted); font-family:'IBM Plex Mono',monospace; font-size:11px; padding:5px 10px; border-radius:6px; cursor:pointer; }
+  .copy:hover { color: var(--ink); border-color: var(--accent); }
+  .copy.copied { color: var(--accent-2); border-color: var(--accent-2); }
+
+  .kv { font-family:'IBM Plex Mono',monospace; font-size:13px; }
+  .kv code { color: var(--accent); }
+
+  footer { text-align:center; color:var(--muted); font-size:12px; margin-top:40px; font-family:'IBM Plex Mono',monospace; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="head-inner">
+    <p class="eyebrow">Production Deployment · Runbook</p>
+    <h1>Texas Informative — Multi-Node Go-Live Plan</h1>
+    <div class="sub">Source server <span class="kv">[SOURCE_SERVER]</span> → Live · 8 databases · 6 sites · Germany / Indonesia / Iraq / Malaysia / New&nbsp;Zealand / Singapore nodes</div>
+    <div class="progress-row">
+      <div class="bar"><i id="barFill"></i></div>
+      <div class="pct" id="pctText">0 / 0 done</div>
+      <button class="reset" id="resetBtn">Reset</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+<main>
+
+  <div class="note">
+    <b>Before you start:</b> take a full backup of the current live databases and the current live site folders. Run the data steps inside a transaction where possible, and verify row counts after each copy. Placeholders <span class="kv">[NEW_LIVE_DB]</span> (restored DB) and <span class="kv">[CURRENT_LIVE_DB]</span> (existing live DB you are migrating from) must be replaced with your real database names before running any SQL.
+  </div>
+
+  <!-- STEP 1 -->
+  <section class="step" data-step>
+    <div class="step-head">
+      <div class="step-num">01</div>
+      <div class="step-title">Export databases from source server</div>
+      <span class="step-meta">[SOURCE_SERVER]</span>
+      <span class="chev">▶</span>
+    </div>
+    <div class="step-body">
+      <p style="color:var(--muted);font-size:14px;margin:10px 0 0">Take a <b>.bak</b> backup (or generate scripts) for each of the 8 databases on <span class="kv">[SOURCE_SERVER]</span>:</p>
+      <ul class="tasks">
+        <li><input type="checkbox"><label>Export <span class="mono">[DB_MAIN]</span></label></li>
+        <li><input type="checkbox"><label>Export <span class="mono">[DB_NODE_GERMANY]</span></label></li>
+        <li><input type="checkbox"><label>Export <span class="mono">[DB_NODE_INDONESIA]</span></label></li>
+        <li><input type="checkbox"><label>Export <span class="mono">[DB_NODE_IRAQ]</span></label></li>
+        <li><input type="checkbox"><label>Export <span class="mono">[DB_NODE_MALAYSIA]</span></label></li>
+        <li><input type="checkbox"><label>Export <span class="mono">[DB_NODE_NEWZEALAND]</span></label></li>
+        <li><input type="checkbox"><label>Export <span class="mono">[DB_NODE_SINGAPORE]</span></label></li>
+        <li><input type="checkbox"><label>Export <span class="mono">[DB_NODE_CORE]</span></label></li>
+        <li><input type="checkbox"><label>Verify all 8 backup files are complete and transfer them to the live server</label></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- STEP 2 -->
+  <section class="step" data-step>
+    <div class="step-head">
+      <div class="step-num">02</div>
+      <div class="step-title">Restore all databases to the live server</div>
+      <span class="step-meta">live SQL instance</span>
+      <span class="chev">▶</span>
+    </div>
+    <div class="step-body">
+      <ul class="tasks">
+        <li><input type="checkbox"><label>Restore <span class="mono">[DB_MAIN]</span></label></li>
+        <li><input type="checkbox"><label>Restore <span class="mono">[DB_NODE_GERMANY]</span></label></li>
+        <li><input type="checkbox"><label>Restore <span class="mono">[DB_NODE_INDONESIA]</span></label></li>
+        <li><input type="checkbox"><label>Restore <span class="mono">[DB_NODE_IRAQ]</span></label></li>
+        <li><input type="checkbox"><label>Restore <span class="mono">[DB_NODE_MALAYSIA]</span></label></li>
+        <li><input type="checkbox"><label>Restore <span class="mono">[DB_NODE_NEWZEALAND]</span></label></li>
+        <li><input type="checkbox"><label>Restore <span class="mono">[DB_NODE_SINGAPORE]</span></label></li>
+        <li><input type="checkbox"><label>Restore <span class="mono">[DB_NODE_CORE]</span></label></li>
+        <li><input type="checkbox"><label>Confirm DB users / logins are mapped and app login has access</label></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- STEP 3 -->
+  <section class="step" data-step>
+    <div class="step-head">
+      <div class="step-num">03</div>
+      <div class="step-title">Clear transactional tables in the restored live DB <span class="tag sql">SQL</span><span class="tag danger">destructive</span></div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="step-body">
+      <p style="color:var(--muted);font-size:14px;margin:10px 0 0">Deletes are ordered <b>child → parent</b> so foreign keys don't block them. Run inside a transaction.</p>
+      <div class="codeblock">
+        <div class="cap">Step 3 — DELETE (run on [NEW_LIVE_DB])</div>
+        <button class="copy">copy</button>
+<pre>USE [NEW_LIVE_DB];
+GO
+BEGIN TRANSACTION;
+
+-- Child tables first
+DELETE FROM dbo.ContactusAttachment;
+DELETE FROM dbo.ContactUs;
+
+DELETE FROM dbo.CareerApplicantAttachment;
+DELETE FROM dbo.CareerApplicant;
+DELETE FROM dbo.CareerLang;
+DELETE FROM dbo.Career;
+
+-- Standalone tables
+DELETE FROM dbo.BirthDay;
+DELETE FROM dbo.PartyPickup;
+
+-- Review affected rows, then:
+COMMIT TRANSACTION;   -- or ROLLBACK TRANSACTION; if something looks wrong
+GO</pre>
+      </div>
+      <ul class="tasks">
+        <li><input type="checkbox"><label>Reviewed row counts and committed the delete transaction</label></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- STEP 4 -->
+  <section class="step" data-step>
+    <div class="step-head">
+      <div class="step-num">04</div>
+      <div class="step-title">Generate a data script from the current live DB (other server) <span class="tag sql">SSMS wizard</span></div>
+      <span class="step-meta">source server</span>
+      <span class="chev">▶</span>
+    </div>
+    <div class="step-body">
+      <p style="color:var(--muted);font-size:14px;margin:10px 0 0">
+        The current live DB sits on a <b>different server</b>, so a cross-database <span class="kv">INSERT...SELECT</span> can't reach it. Instead, use SSMS's <b>Generate Scripts</b> wizard to script the data of the 8 tables into a <span class="kv">.sql</span> file of <span class="kv">INSERT</span> statements, then run that file on the live server.
+      </p>
+
+      <p class="kv" style="color:var(--ink);margin:16px 0 4px;font-size:13px">A · Run the wizard on the SOURCE server</p>
+      <ul class="tasks">
+        <li><input type="checkbox"><label>In SSMS, connect to the source server and expand <span class="mono">[CURRENT_LIVE_DB]</span></label></li>
+        <li><input type="checkbox"><label>Right-click the database → <b>Tasks</b> → <b>Generate Scripts…</b> → on the intro page click <b>Next</b></label></li>
+        <li><input type="checkbox"><label><b>Choose Objects</b> → select <b>Select specific database objects</b> → expand <span class="mono">Tables</span> → tick the 8 tables below → <b>Next</b></label></li>
+        <li><input type="checkbox"><label><b>Set Scripting Options</b> → output = <b>Save to file</b> → <b>Single file</b> → choose a path (e.g. <span class="mono">C:\export\texas_data.sql</span>) → click <b>Advanced</b></label></li>
+        <li><input type="checkbox"><label>In <b>Advanced</b> → set <span class="mono">Types of data to script</span> = <b>Data only</b> (tables already exist after the restore and were cleared in Step 3). Use <b>Schema and data</b> only if a table is missing on the target.</label></li>
+        <li><input type="checkbox"><label>In <b>Advanced</b> → set <span class="mono">Script for Server Version</span> to match the live server → <b>OK</b></label></li>
+        <li><input type="checkbox"><label><b>Next</b> → <b>Next</b> → <b>Finish</b>. Confirm the <span class="mono">.sql</span> file was written.</label></li>
+      </ul>
+
+      <p style="color:var(--muted);font-size:13px;margin:14px 0 4px">The 8 tables to tick (the wizard auto-includes <span class="mono">SET IDENTITY_INSERT ON/OFF</span> for identity tables):</p>
+      <div class="codeblock">
+        <div class="cap">Tables to select</div>
+        <button class="copy">copy</button>
+<pre>ContactUs
+ContactusAttachment
+Career
+CareerApplicant
+CareerApplicantAttachment
+CareerLang
+BirthDay
+PartyPickup</pre>
+      </div>
+
+      <p class="kv" style="color:var(--ink);margin:18px 0 4px;font-size:13px">B · Record source counts (for validation)</p>
+      <div class="codeblock">
+        <div class="cap">Run on the SOURCE server, DB = [CURRENT_LIVE_DB]</div>
+        <button class="copy">copy</button>
+<pre>USE [CURRENT_LIVE_DB];
+GO
+SELECT 'ContactUs' tbl, COUNT(*) cnt FROM dbo.ContactUs
+UNION ALL SELECT 'ContactusAttachment', COUNT(*) FROM dbo.ContactusAttachment
+UNION ALL SELECT 'Career', COUNT(*) FROM dbo.Career
+UNION ALL SELECT 'CareerApplicant', COUNT(*) FROM dbo.CareerApplicant
+UNION ALL SELECT 'CareerApplicantAttachment', COUNT(*) FROM dbo.CareerApplicantAttachment
+UNION ALL SELECT 'CareerLang', COUNT(*) FROM dbo.CareerLang
+UNION ALL SELECT 'BirthDay', COUNT(*) FROM dbo.BirthDay
+UNION ALL SELECT 'PartyPickup', COUNT(*) FROM dbo.PartyPickup;</pre>
+      </div>
+      <ul class="tasks">
+        <li><input type="checkbox"><label>Generated the <span class="mono">.sql</span> data script and recorded source row counts</label></li>
+      </ul>
+
+      <p class="kv" style="color:var(--ink);margin:18px 0 4px;font-size:13px">C · Transfer + run on the LIVE server</p>
+      <ul class="tasks">
+        <li><input type="checkbox"><label>Copy the generated <span class="mono">.sql</span> file to the live server</label></li>
+        <li><input type="checkbox"><label>Confirm Step 3 (clear tables) has already run on <span class="mono">[NEW_LIVE_DB]</span></label></li>
+        <li><input type="checkbox"><label>Open the file in SSMS connected to the live server; add <span class="mono">USE [NEW_LIVE_DB];</span> at the top (or pick it in the DB dropdown), then <b>Execute</b></label></li>
+        <li><input type="checkbox"><label>If foreign-key errors appear, wrap the run with the constraint toggle below (or reorder INSERT blocks parent→child)</label></li>
+        <li><input type="checkbox"><label>Validate row counts on the live DB match the source counts from section B</label></li>
+      </ul>
+
+      <div class="codeblock">
+        <div class="cap">Optional — disable / re-enable FK constraints around the run (on [NEW_LIVE_DB])</div>
+        <button class="copy">copy</button>
+<pre>USE [NEW_LIVE_DB];
+GO
+-- Before running the generated script:
+ALTER TABLE dbo.ContactusAttachment        NOCHECK CONSTRAINT ALL;
+ALTER TABLE dbo.CareerApplicant            NOCHECK CONSTRAINT ALL;
+ALTER TABLE dbo.CareerApplicantAttachment  NOCHECK CONSTRAINT ALL;
+ALTER TABLE dbo.CareerLang                 NOCHECK CONSTRAINT ALL;
+
+-- ... execute the generated INSERT script here ...
+
+-- After running, re-enable and re-validate the constraints:
+ALTER TABLE dbo.ContactusAttachment        WITH CHECK CHECK CONSTRAINT ALL;
+ALTER TABLE dbo.CareerApplicant            WITH CHECK CHECK CONSTRAINT ALL;
+ALTER TABLE dbo.CareerApplicantAttachment  WITH CHECK CHECK CONSTRAINT ALL;
+ALTER TABLE dbo.CareerLang                 WITH CHECK CHECK CONSTRAINT ALL;
+GO</pre>
+      </div>
+
+      <div class="note" style="margin:16px 0 0">
+        <b>Large tables / big files:</b> the Generate Scripts wizard can be slow and produce very large <span class="mono">.sql</span> files. For high-row tables (e.g. attachments), the <b>Import and Export Wizard</b>, <b>BCP</b>, or a temporary <b>linked server</b> are faster alternatives. The end result is the same: data lands in <span class="mono">[NEW_LIVE_DB]</span>.
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 5 (was 6) -->
+  <section class="step" data-step>
+    <div class="step-head">
+      <div class="step-num">05</div>
+      <div class="step-title">Create the 6 sites in IIS on the live server</div>
+      <span class="step-meta">[SOURCE_SERVER] → live</span>
+      <span class="chev">▶</span>
+    </div>
+    <div class="step-body">
+      <p style="color:var(--muted);font-size:14px;margin:10px 0 0">Recreate the same 6 sites/links that exist on the source, on the live server:</p>
+      <ul class="tasks">
+        <li><input type="checkbox"><label>Node Admin Panel</label></li>
+        <li><input type="checkbox"><label>Node API</label></li>
+        <li><input type="checkbox"><label>Node Image Repository</label></li>
+        <li><input type="checkbox"><label>Texas Admin Panel</label></li>
+        <li><input type="checkbox"><label>Texas API</label></li>
+        <li><input type="checkbox"><label>Texas Image Repository</label></li>
+        <li><input type="checkbox"><label>App pools, bindings (host/port/SSL) and .NET versions configured for each</label></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- STEP 7 -->
+  <section class="step" data-step>
+    <div class="step-head">
+      <div class="step-num">06</div>
+      <div class="step-title">Copy application folders to the live server</div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="step-body">
+      <ul class="tasks">
+        <li><input type="checkbox"><label><span class="mono">Texas-informative-node-Adminpanel</span></label></li>
+        <li><input type="checkbox"><label><span class="mono">Texas-informative-node-APIs</span></label></li>
+        <li><input type="checkbox"><label><span class="mono">Texas-informative-node-ImageRepository</span></label></li>
+        <li><input type="checkbox"><label><span class="mono">Texas-informative-tx-Adminpanel</span></label></li>
+        <li><input type="checkbox"><label><span class="mono">Texas-informative-tx-APIs</span></label></li>
+        <li><input type="checkbox"><label><span class="mono">Texas-informative-tx-ImageRepository</span></label></li>
+        <li><input type="checkbox"><label>Verify file permissions (app pool identity needs read/write where applicable)</label></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- STEP 7 (NEW) — last-month image + file sync (manual zip) -->
+  <section class="step" data-step>
+    <div class="step-head">
+      <div class="step-num">07</div>
+      <div class="step-title">Copy last-month images &amp; FileRepository (zip → copy → unzip) <span class="tag">manual</span></div>
+      <span class="step-meta">cutover delta</span>
+      <span class="chev">▶</span>
+    </div>
+    <div class="step-body">
+      <p style="color:var(--muted);font-size:14px;margin:10px 0 0">
+        The databases are on <b>different servers</b>, so the physical files behind the data (uploaded images and contact/career attachments) move across by hand. On the current live server, grab the last month's files, zip them, copy the zip over, and unzip into the matching folder on the new server.
+      </p>
+
+      <p class="kv" style="color:var(--ink);margin:16px 0 6px;font-size:13px">A · Images — Texas Image Repository</p>
+      <ul class="tasks">
+        <li><input type="checkbox"><label>On the <b>current live server</b>, open the <span class="mono">Texas Image Repository</span> folder</label></li>
+        <li><input type="checkbox"><label>Sort by <b>Date modified</b> (newest first) and select the files/folders from the <b>last month</b></label></li>
+        <li><input type="checkbox"><label>Right-click → <b>Send to → Compressed (zipped) folder</b> → name it e.g. <span class="mono">images_lastmonth.zip</span></label></li>
+        <li><input type="checkbox"><label>Copy the zip to the <b>new server</b> and paste it into the <span class="mono">Texas Image Repository</span> folder</label></li>
+        <li><input type="checkbox"><label><b>Extract All</b> there → confirm files merge into the right subfolders → delete the zip</label></li>
+      </ul>
+
+      <p class="kv" style="color:var(--ink);margin:18px 0 6px;font-size:13px">B · FileRepository — contact + career attachments</p>
+      <ul class="tasks">
+        <li><input type="checkbox"><label>On the <b>current live server</b>, open <span class="mono">Texas Image Repository \ FileRepository</span></label></li>
+        <li><input type="checkbox"><label>Sort by <b>Date modified</b> and select the <b>last month's</b> files</label></li>
+        <li><input type="checkbox"><label>Zip them → e.g. <span class="mono">filerepo_lastmonth.zip</span></label></li>
+        <li><input type="checkbox"><label>Copy the zip to the <b>new server</b> and paste into <span class="mono">Texas Image Repository \ FileRepository</span></label></li>
+        <li><input type="checkbox"><label><b>Extract All</b> there → confirm files land correctly → delete the zip</label></li>
+      </ul>
+
+      <ul class="tasks" style="margin-top:14px">
+        <li><input type="checkbox"><label>Spot-check: open a few recently-uploaded images and attachments on the new server</label></li>
+        <li><input type="checkbox"><label>App-pool identity has read access to the extracted files</label></li>
+      </ul>
+
+      <div class="note" style="margin:16px 0 0">
+        <b>Tip:</b> when extracting on the new server, keep the <b>same folder structure</b> as the source so paths still match what's stored in the database (the attachment paths in <span class="mono">ContactusAttachment</span> / <span class="mono">CareerApplicantAttachment</span> must resolve). Extract <i>into</i> the existing folder so files merge rather than landing in a new subfolder.
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 8 -->
+  <section class="step" data-step>
+    <div class="step-head">
+      <div class="step-num">08</div>
+      <div class="step-title">Create IIS virtual directories</div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="step-body">
+      <ul class="tasks">
+        <li><input type="checkbox"><label><b>Node Admin Panel</b> → virtual dir <span class="mono">ImageRepository</span> → points to the <b>Node Image Repository</b> folder</label></li>
+        <li><input type="checkbox"><label><b>Texas Admin Panel</b> → virtual dir <span class="mono">ImageRepository</span> → points to the <b>Texas Image Repository</b> folder</label></li>
+        <li><input type="checkbox"><label><b>Texas Admin Panel</b> → virtual dir <span class="mono">FileRepository</span> → points to <b>Texas Image Repository / FileRepository</b></label></li>
+        <li><input type="checkbox"><label><b>Texas API</b> → virtual dir <span class="mono">FileRepository</span> → points to <b>Texas Image Repository / FileRepository</b></label></li>
+        <li><input type="checkbox"><label>Confirm each virtual dir resolves (browse a known file through it)</label></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- STEP 9 -->
+  <section class="step" data-step>
+    <div class="step-head">
+      <div class="step-num">09</div>
+      <div class="step-title">Update Node Admin Panel <span class="mono">web.config</span></div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="step-body">
+      <ul class="tasks">
+        <li><input type="checkbox"><label>Set <span class="mono">GlobalDatabaseContainer</span> connection string → live <span class="mono">[DB_NODE_CORE]</span></label></li>
+        <li><input type="checkbox"><label>appSettings → <span class="mono">ImageRepository</span> = live Node Image Repository link</label></li>
+        <li><input type="checkbox"><label>appSettings → <span class="mono">BackURL</span> = live Node Admin Panel link</label></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- STEP 10 -->
+  <section class="step" data-step>
+    <div class="step-head">
+      <div class="step-num">10</div>
+      <div class="step-title">Update Node API <span class="mono">web.config</span></div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="step-body">
+      <ul class="tasks">
+        <li><input type="checkbox"><label>Set <span class="mono">GlobalDatabaseContainer</span> connection string → live <span class="mono">[DB_NODE_CORE]</span></label></li>
+        <li><input type="checkbox"><label>appSettings → <span class="mono">ImageRepository</span> = live Node Image Repository link</label></li>
+        <li><input type="checkbox"><label>appSettings → <span class="mono">BaseURL</span> = live Node Image Repository link</label></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- STEP 11 -->
+  <section class="step" data-step>
+    <div class="step-head">
+      <div class="step-num">11</div>
+      <div class="step-title">Update Texas Admin Panel <span class="mono">web.config</span></div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="step-body">
+      <ul class="tasks">
+        <li><input type="checkbox"><label>Set <span class="mono">DatabaseContainer</span> connection string → live <span class="mono">[DB_MAIN]</span></label></li>
+        <li><input type="checkbox"><label>appSettings → <span class="mono">ImagePath</span> = Texas Image Repository link</label></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- STEP 12 -->
+  <section class="step" data-step>
+    <div class="step-head">
+      <div class="step-num">12</div>
+      <div class="step-title">Update Texas API <span class="mono">appsettings.json</span></div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="step-body">
+      <ul class="tasks">
+        <li><input type="checkbox"><label><span class="mono">ConnectionStrings:TexasInformativeDB</span> → live <span class="mono">[DB_MAIN]</span></label></li>
+        <li><input type="checkbox"><label><span class="mono">AppSettings:InformativeImageRepository</span> = Texas Image Repository link</label></li>
+        <li><input type="checkbox"><label><span class="mono">FileAttachmentSettings:ContactUsAttachmentsPath</span> = server path of <b>FileRepository</b> folder inside Texas Image Repository</label></li>
+        <li><input type="checkbox"><label><span class="mono">FileAttachmentSettings:CareerAttachmentsPath</span> = same <b>FileRepository</b> server path</label></li>
+        <li><input type="checkbox"><label>Clear <span class="mono">AllowedOrigins</span>, then add all 6 front links (Germany, Indonesia, Iraq, Malaysia, New&nbsp;Zealand, Singapore)</label></li>
+      </ul>
+      <div class="codeblock">
+        <div class="cap">AllowedOrigins — example shape</div>
+        <button class="copy">copy</button>
+<pre>"AllowedOrigins": [
+  "https://germany.front.example.com",
+  "https://indonesia.front.example.com",
+  "https://iraq.front.example.com",
+  "https://malaysia.front.example.com",
+  "https://newzealand.front.example.com",
+  "https://singapore.front.example.com"
+]</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 13 -->
+  <section class="step" data-step>
+    <div class="step-head">
+      <div class="step-num">13</div>
+      <div class="step-title">Docker + Redis + remaining app settings</div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="step-body">
+      <ul class="tasks">
+        <li><input type="checkbox"><label>Install / set up Docker on the server</label></li>
+        <li><input type="checkbox"><label>Create the Redis host and wire up <span class="mono">RedisSettings</span></label></li>
+        <li><input type="checkbox"><label>Set <span class="mono">ExternalServicesUrls:Notifications</span> → live notification URL</label></li>
+        <li><input type="checkbox"><label>Set <span class="mono">Recaptcha.Enabled = true</span>, <span class="mono">MinimumScore = 0.5</span></label></li>
+      </ul>
+      <div class="codeblock">
+        <div class="cap">RedisSettings</div>
+        <button class="copy">copy</button>
+<pre>"RedisSettings": {
+  "Host": "[REDIS_HOST]",
+  "Port": "[REDIS_PORT]",
+  "User": "default",
+  "Password": "&lt;set-in-secret-store&gt;"
+}</pre>
+      </div>
+      <div class="codeblock">
+        <div class="cap">Notifications + Recaptcha</div>
+        <button class="copy">copy</button>
+<pre>"ExternalServicesUrls": {
+  "Notifications": "https://[NOTIFICATIONS_URL]"
+},
+"Recaptcha": {
+  "Enabled": true,
+  "MinimumScore": 0.5
+}</pre>
+      </div>
+      <div class="note" style="margin:16px 0 0;border-left-color:var(--danger)">
+        <b>Security note:</b> you pasted the live Redis password in plain text. I left a placeholder in the snippet above — keep the real password out of source-controlled config and store it in environment variables, IIS app-pool secrets, or a secrets manager. Since it has already been shared in plain text, consider rotating it.
+      </div>
+    </div>
+  </section>
+
+  <!-- POST -->
+  <section class="step" data-step>
+    <div class="step-head">
+      <div class="step-num">✓</div>
+      <div class="step-title">Post-deployment verification</div>
+      <span class="chev">▶</span>
+    </div>
+    <div class="step-body">
+      <ul class="tasks">
+        <li><input type="checkbox"><label>All 6 sites load over their live bindings</label></li>
+        <li><input type="checkbox"><label>Images and file attachments resolve through the virtual directories</label></li>
+        <li><input type="checkbox"><label>Admin panels connect to the correct live databases</label></li>
+        <li><input type="checkbox"><label>Contact Us + Career submissions write and read correctly</label></li>
+        <li><input type="checkbox"><label>CORS works for all 6 front links; Redis + notifications + reCAPTCHA verified</label></li>
+        <li><input type="checkbox"><label>Smoke test each node front-end (Germany / Indonesia / Iraq / Malaysia / NZ / Singapore)</label></li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>Texas Informative · production runbook · check items as you go — progress saves locally in your browser</footer>
+</main>
+</div>
+
+<script>
+(function(){
+  var STORAGE_KEY = 'texas_deploy_progress_v1';
+  var steps = Array.prototype.slice.call(document.querySelectorAll('[data-step]'));
+
+  // assign stable ids to checkboxes
+  var idx = 0;
+  var boxes = Array.prototype.slice.call(document.querySelectorAll('ul.tasks input[type=checkbox]'));
+  boxes.forEach(function(b){ b.dataset.cid = 'c' + (idx++); });
+
+  // load saved state (guarded so it never breaks rendering)
+  var saved = {};
+  try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') || {}; } catch(e){ saved = {}; }
+
+  function save(){
+    var state = {};
+    boxes.forEach(function(b){ state[b.dataset.cid] = b.checked; });
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e){}
+  }
+
+  function syncLabel(b){
+    var label = b.parentElement.querySelector('label');
+    if(label){ label.classList.toggle('done-label', b.checked); }
+  }
+
+  function updateStepState(){
+    steps.forEach(function(s){
+      var inputs = s.querySelectorAll('input[type=checkbox]');
+      if(!inputs.length){ return; }
+      var all = Array.prototype.every.call(inputs, function(i){ return i.checked; });
+      s.classList.toggle('done', all);
+    });
+  }
+
+  function updateProgress(){
+    var total = boxes.length;
+    var done = boxes.filter(function(b){ return b.checked; }).length;
+    var pct = total ? Math.round(done/total*100) : 0;
+    document.getElementById('barFill').style.width = pct + '%';
+    document.getElementById('pctText').textContent = done + ' / ' + total + ' done · ' + pct + '%';
+  }
+
+  boxes.forEach(function(b){
+    if(saved[b.dataset.cid]){ b.checked = true; }
+    syncLabel(b);
+    b.addEventListener('change', function(){
+      syncLabel(b); save(); updateStepState(); updateProgress();
+    });
+  });
+
+  // collapsible steps
+  steps.forEach(function(s, i){
+    var head = s.querySelector('.step-head');
+    head.addEventListener('click', function(){ s.classList.toggle('open'); });
+    if(i === 0){ s.classList.add('open'); }
+  });
+
+  // copy buttons
+  document.querySelectorAll('.copy').forEach(function(btn){
+    btn.addEventListener('click', function(e){
+      e.stopPropagation();
+      var pre = btn.parentElement.querySelector('pre');
+      var text = pre.innerText;
+      var done = function(){
+        btn.textContent = 'copied'; btn.classList.add('copied');
+        setTimeout(function(){ btn.textContent = 'copy'; btn.classList.remove('copied'); }, 1400);
+      };
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(done, function(){ fallback(text); done(); });
+      } else { fallback(text); done(); }
+    });
+  });
+  function fallback(text){
+    var ta = document.createElement('textarea'); ta.value = text;
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch(e){}
+    document.body.removeChild(ta);
+  }
+
+  document.getElementById('resetBtn').addEventListener('click', function(){
+    if(!confirm('Reset all checkboxes?')) return;
+    boxes.forEach(function(b){ b.checked = false; syncLabel(b); });
+    try { localStorage.removeItem(STORAGE_KEY); } catch(e){}
+    updateStepState(); updateProgress();
+  });
+
+  updateStepState();
+  updateProgress();
+})();
+</script>
+</body>
+</html>
