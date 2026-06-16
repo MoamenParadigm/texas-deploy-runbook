@@ -509,26 +509,14 @@ GO</pre>
   <section class="step" data-step>
     <div class="step-head">
       <div class="step-num">13</div>
-      <div class="step-title">Docker + Redis + remaining app settings</div>
+      <div class="step-title">Remaining app settings</div>
       <span class="chev">▶</span>
     </div>
     <div class="step-body">
       <ul class="tasks">
-        <li><input type="checkbox"><label>Install / set up Docker on the server</label></li>
-        <li><input type="checkbox"><label>Create the Redis host and wire up <span class="mono">RedisSettings</span></label></li>
         <li><input type="checkbox"><label>Set <span class="mono">ExternalServicesUrls:Notifications</span> → live notification URL</label></li>
         <li><input type="checkbox"><label>Set <span class="mono">Recaptcha.Enabled = true</span>, <span class="mono">MinimumScore = 0.5</span></label></li>
       </ul>
-      <div class="codeblock">
-        <div class="cap">RedisSettings</div>
-        <button class="copy">copy</button>
-<pre>"RedisSettings": {
-  "Host": "[REDIS_HOST]",
-  "Port": "[REDIS_PORT]",
-  "User": "default",
-  "Password": "&lt;set-in-secret-store&gt;"
-}</pre>
-      </div>
       <div class="codeblock">
         <div class="cap">Notifications + Recaptcha</div>
         <button class="copy">copy</button>
@@ -539,9 +527,6 @@ GO</pre>
   "Enabled": true,
   "MinimumScore": 0.5
 }</pre>
-      </div>
-      <div class="note" style="margin:16px 0 0;border-left-color:var(--danger)">
-        <b>Security note:</b> you pasted the live Redis password in plain text. I left a placeholder in the snippet above — keep the real password out of source-controlled config and store it in environment variables, IIS app-pool secrets, or a secrets manager. Since it has already been shared in plain text, consider rotating it.
       </div>
     </div>
   </section>
@@ -559,7 +544,7 @@ GO</pre>
         <li><input type="checkbox"><label>Images and file attachments resolve through the virtual directories</label></li>
         <li><input type="checkbox"><label>Admin panels connect to the correct live databases</label></li>
         <li><input type="checkbox"><label>Contact Us + Career submissions write and read correctly</label></li>
-        <li><input type="checkbox"><label>CORS works for all 6 front links; Redis + notifications + reCAPTCHA verified</label></li>
+        <li><input type="checkbox"><label>CORS works for all 6 front links; notifications + reCAPTCHA verified</label></li>
         <li><input type="checkbox"><label>Smoke test each node front-end (Germany / Indonesia / Iraq / Malaysia / NZ / Singapore)</label></li>
       </ul>
     </div>
