@@ -432,14 +432,14 @@ GO</pre>
   <section class="step" data-step>
     <div class="step-head">
       <div class="step-num">09</div>
-      <div class="step-title">Update Node Admin Panel <span class="mono">web.config</span></div>
+      <div class="step-title">Point Node Admin Panel at env vars <span class="mono">web.config</span></div>
       <span class="chev">▶</span>
     </div>
     <div class="step-body">
+      <p style="color:var(--muted);font-size:14px;margin:10px 0 0">All sensitive values for this app are supplied via environment variables — listed in <b>Step 13 · Environment variables</b>. This step just confirms the app reads them and nothing sensitive stays hardcoded.</p>
       <ul class="tasks">
-        <li><input type="checkbox"><label>Set <span class="mono">GlobalDatabaseContainer</span> connection string → live <span class="mono">[DB_NODE_CORE]</span></label></li>
-        <li><input type="checkbox"><label>appSettings → <span class="mono">ImageRepository</span> = live Node Image Repository link</label></li>
-        <li><input type="checkbox"><label>appSettings → <span class="mono">BackURL</span> = live Node Admin Panel link</label></li>
+        <li><input type="checkbox"><label>Confirm <span class="mono">GlobalDatabaseContainer</span>, <span class="mono">ImageRepository</span> and <span class="mono">BackURL</span> resolve from environment variables (Step 13)</label></li>
+        <li><input type="checkbox"><label>Remove any hardcoded connection string / links from <span class="mono">web.config</span></label></li>
       </ul>
     </div>
   </section>
@@ -448,14 +448,14 @@ GO</pre>
   <section class="step" data-step>
     <div class="step-head">
       <div class="step-num">10</div>
-      <div class="step-title">Update Node API <span class="mono">web.config</span></div>
+      <div class="step-title">Point Node API at env vars <span class="mono">web.config</span></div>
       <span class="chev">▶</span>
     </div>
     <div class="step-body">
+      <p style="color:var(--muted);font-size:14px;margin:10px 0 0">All sensitive values come from <b>Step 13 · Environment variables</b>.</p>
       <ul class="tasks">
-        <li><input type="checkbox"><label>Set <span class="mono">GlobalDatabaseContainer</span> connection string → live <span class="mono">[DB_NODE_CORE]</span></label></li>
-        <li><input type="checkbox"><label>appSettings → <span class="mono">ImageRepository</span> = live Node Image Repository link</label></li>
-        <li><input type="checkbox"><label>appSettings → <span class="mono">BaseURL</span> = live Node Image Repository link</label></li>
+        <li><input type="checkbox"><label>Confirm <span class="mono">GlobalDatabaseContainer</span>, <span class="mono">ImageRepository</span> and <span class="mono">BaseURL</span> resolve from environment variables (Step 13)</label></li>
+        <li><input type="checkbox"><label>Remove any hardcoded connection string / links from <span class="mono">web.config</span></label></li>
       </ul>
     </div>
   </section>
@@ -464,13 +464,14 @@ GO</pre>
   <section class="step" data-step>
     <div class="step-head">
       <div class="step-num">11</div>
-      <div class="step-title">Update Texas Admin Panel <span class="mono">web.config</span></div>
+      <div class="step-title">Point Texas Admin Panel at env vars <span class="mono">web.config</span></div>
       <span class="chev">▶</span>
     </div>
     <div class="step-body">
+      <p style="color:var(--muted);font-size:14px;margin:10px 0 0">All sensitive values come from <b>Step 13 · Environment variables</b>.</p>
       <ul class="tasks">
-        <li><input type="checkbox"><label>Set <span class="mono">DatabaseContainer</span> connection string → live <span class="mono">[DB_MAIN]</span></label></li>
-        <li><input type="checkbox"><label>appSettings → <span class="mono">ImagePath</span> = Texas Image Repository link</label></li>
+        <li><input type="checkbox"><label>Confirm <span class="mono">DatabaseContainer</span> and <span class="mono">ImagePath</span> resolve from environment variables (Step 13)</label></li>
+        <li><input type="checkbox"><label>Remove any hardcoded connection string / links from <span class="mono">web.config</span></label></li>
       </ul>
     </div>
   </section>
@@ -479,29 +480,16 @@ GO</pre>
   <section class="step" data-step>
     <div class="step-head">
       <div class="step-num">12</div>
-      <div class="step-title">Update Texas API <span class="mono">appsettings.json</span></div>
+      <div class="step-title">Point Texas API at env vars <span class="mono">appsettings.json</span></div>
       <span class="chev">▶</span>
     </div>
     <div class="step-body">
+      <p style="color:var(--muted);font-size:14px;margin:10px 0 0">All sensitive values come from <b>Step 13 · Environment variables</b>. Only the non-sensitive <span class="mono">Recaptcha.Enabled</span> / <span class="mono">MinimumScore</span> stay in <span class="mono">appsettings.json</span>.</p>
       <ul class="tasks">
-        <li><input type="checkbox"><label><span class="mono">ConnectionStrings:TexasInformativeDB</span> → live <span class="mono">[DB_MAIN]</span></label></li>
-        <li><input type="checkbox"><label><span class="mono">AppSettings:InformativeImageRepository</span> = Texas Image Repository link</label></li>
-        <li><input type="checkbox"><label><span class="mono">FileAttachmentSettings:ContactUsAttachmentsPath</span> = server path of <b>FileRepository</b> folder inside Texas Image Repository</label></li>
-        <li><input type="checkbox"><label><span class="mono">FileAttachmentSettings:CareerAttachmentsPath</span> = same <b>FileRepository</b> server path</label></li>
-        <li><input type="checkbox"><label>Clear <span class="mono">AllowedOrigins</span>, then add all 6 front links (Germany, Indonesia, Iraq, Malaysia, New&nbsp;Zealand, Singapore)</label></li>
+        <li><input type="checkbox"><label>Confirm <span class="mono">ConnectionStrings:TexasInformativeDB</span>, <span class="mono">AppSettings:InformativeImageRepository</span>, the <span class="mono">FileAttachmentSettings</span> paths and <span class="mono">AllowedOrigins</span> all resolve from environment variables (Step 13)</label></li>
+        <li><input type="checkbox"><label>Remove the matching plaintext values from <span class="mono">appsettings.json</span></label></li>
+        <li><input type="checkbox"><label>Leave <span class="mono">Recaptcha.Enabled = true</span>, <span class="mono">MinimumScore = 0.5</span> in <span class="mono">appsettings.json</span> (not sensitive)</label></li>
       </ul>
-      <div class="codeblock">
-        <div class="cap">AllowedOrigins — example shape</div>
-        <button class="copy">copy</button>
-<pre>"AllowedOrigins": [
-  "https://germany.front.example.com",
-  "https://indonesia.front.example.com",
-  "https://iraq.front.example.com",
-  "https://malaysia.front.example.com",
-  "https://newzealand.front.example.com",
-  "https://singapore.front.example.com"
-]</pre>
-      </div>
     </div>
   </section>
 
@@ -509,37 +497,81 @@ GO</pre>
   <section class="step" data-step>
     <div class="step-head">
       <div class="step-num">13</div>
-      <div class="step-title">Remaining app settings</div>
+      <div class="step-title">Environment variables — all sensitive values <span class="tag">central</span></div>
       <span class="chev">▶</span>
     </div>
     <div class="step-body">
+      <p style="color:var(--muted);font-size:14px;margin:10px 0 0">
+        Every connection string, internal link, file path, allowed origin and secret/code lives here as an <b>environment variable</b> instead of being hardcoded in <span class="mono">web.config</span> / <span class="mono">appsettings.json</span>. .NET maps the double underscore <span class="mono">__</span> to the config <span class="mono">:</span> nesting. Fill the <span class="mono">...</span> placeholders with the real live values on the server.
+      </p>
       <ul class="tasks">
-        <li><input type="checkbox"><label>Set the Notifications URL as an <b>environment variable</b> (not in <span class="mono">appsettings.json</span>) — .NET maps the double underscore <span class="mono">__</span> to the JSON <span class="mono">:</span> nesting</label></li>
-        <li><input type="checkbox"><label>Restart the site / app pool so the new environment variable is picked up</label></li>
-        <li><input type="checkbox"><label>Set <span class="mono">Recaptcha.Enabled = true</span>, <span class="mono">MinimumScore = 0.5</span></label></li>
+        <li><input type="checkbox"><label>Set every variable below (machine-level, or per app pool — see tip)</label></li>
+        <li><input type="checkbox"><label>Remove the matching plaintext values from <span class="mono">web.config</span> / <span class="mono">appsettings.json</span></label></li>
+        <li><input type="checkbox"><label>Restart each site / app pool so the variables are picked up</label></li>
+        <li><input type="checkbox"><label>Confirm no connection string, link or key remains hardcoded in source-controlled config</label></li>
       </ul>
-      <div class="codeblock">
-        <div class="cap">Notifications — environment variable</div>
-        <button class="copy">copy</button>
-<pre># .NET binds ExternalServicesUrls__Notifications  ->  ExternalServicesUrls:Notifications
-ExternalServicesUrls__Notifications = https://[NOTIFICATIONS_URL]
 
-# PowerShell — set machine-level (run as admin), then restart the app pool:
-[Environment]::SetEnvironmentVariable(
-  "ExternalServicesUrls__Notifications",
-  "https://[NOTIFICATIONS_URL]",
-  "Machine")</pre>
-      </div>
       <div class="codeblock">
-        <div class="cap">Recaptcha — appsettings.json</div>
+        <div class="cap">Node Admin Panel</div>
         <button class="copy">copy</button>
-<pre>"Recaptcha": {
-  "Enabled": true,
-  "MinimumScore": 0.5
-}</pre>
+<pre>ConnectionStrings__GlobalDatabaseContainer = ...   # live [DB_NODE_CORE] connection string
+ImageRepository = ...                              # live Node Image Repository link
+BackURL = ...                                      # live Node Admin Panel link</pre>
       </div>
+
+      <div class="codeblock">
+        <div class="cap">Node API</div>
+        <button class="copy">copy</button>
+<pre>ConnectionStrings__GlobalDatabaseContainer = ...   # live [DB_NODE_CORE] connection string
+ImageRepository = ...                              # live Node Image Repository link
+BaseURL = ...                                      # live Node Image Repository link</pre>
+      </div>
+
+      <div class="codeblock">
+        <div class="cap">Texas Admin Panel</div>
+        <button class="copy">copy</button>
+<pre>ConnectionStrings__DatabaseContainer = ...   # live [DB_MAIN] connection string
+ImagePath = ...                              # Texas Image Repository link</pre>
+      </div>
+
+      <div class="codeblock">
+        <div class="cap">Texas API</div>
+        <button class="copy">copy</button>
+<pre>ConnectionStrings__TexasInformativeDB            = ...   # live [DB_MAIN] connection string
+AppSettings__InformativeImageRepository          = ...   # Texas Image Repository link
+FileAttachmentSettings__ContactUsAttachmentsPath = ...   # FileRepository server path
+FileAttachmentSettings__CareerAttachmentsPath    = ...   # FileRepository server path
+ExternalServicesUrls__Notifications              = https://[NOTIFICATIONS_URL]
+Recaptcha__SiteKey                               = ...   # reCAPTCHA site key (code)
+Recaptcha__SecretKey                             = ...   # reCAPTCHA secret key (code)
+
+# CORS allowed origins — one indexed entry per front link
+AllowedOrigins__0 = https://germany.front.example.com
+AllowedOrigins__1 = https://indonesia.front.example.com
+AllowedOrigins__2 = https://iraq.front.example.com
+AllowedOrigins__3 = https://malaysia.front.example.com
+AllowedOrigins__4 = https://newzealand.front.example.com
+AllowedOrigins__5 = https://singapore.front.example.com</pre>
+      </div>
+
+      <div class="codeblock">
+        <div class="cap">PowerShell — set machine-level (run as admin), then restart app pools</div>
+        <button class="copy">copy</button>
+<pre>$vars = @{
+  "ConnectionStrings__TexasInformativeDB" = "..."
+  "ExternalServicesUrls__Notifications"   = "https://[NOTIFICATIONS_URL]"
+  "Recaptcha__SiteKey"                    = "..."
+  "Recaptcha__SecretKey"                  = "..."
+  # ... add the rest of the keys from the blocks above
+}
+foreach ($k in $vars.Keys) {
+  [Environment]::SetEnvironmentVariable($k, $vars[$k], "Machine")
+}
+# then recycle the app pools / restart the sites</pre>
+      </div>
+
       <div class="note" style="margin:16px 0 0">
-        <b>Tip:</b> to scope it to just this app instead of machine-wide, add the variable under the IIS <b>Application Pool → Advanced Settings → Environment Variables</b> (or in <span class="mono">web.config</span> via <span class="mono">&lt;environmentVariables&gt;</span> under <span class="mono">aspNetCore</span>), then recycle the pool.
+        <b>web.config vs appsettings.json:</b> the <b>Texas API</b> (ASP.NET Core) reads <span class="mono">__</span> env vars automatically. The classic ASP.NET apps (Node Admin Panel, Node API, Texas Admin Panel) need the <span class="mono">Microsoft.Configuration.ConfigurationBuilders.Environment</span> config builder (or read the env var in code) for <span class="mono">web.config</span> to pick them up. Either way you can scope a variable to one app via IIS <b>Application Pool → Advanced Settings → Environment Variables</b>, then recycle the pool.
       </div>
     </div>
   </section>
