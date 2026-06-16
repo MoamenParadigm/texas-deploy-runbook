@@ -689,5 +689,255 @@ foreach ($k in $vars.Keys) {
   updateProgress();
 })();
 </script>
+
+<style id="i18nStyle">
+  #langBtn{position:absolute;top:18px;right:24px;background:var(--panel-2);border:1px solid var(--border);color:var(--accent);font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;padding:6px 12px;border-radius:8px;cursor:pointer;z-index:60;}
+  #langBtn:hover{border-color:var(--accent);color:var(--ink);}
+  body.rtl{direction:rtl;font-family:'Segoe UI','Tahoma','Sora',sans-serif;}
+  body.rtl .eyebrow,body.rtl .step-meta,body.rtl .cap,body.rtl .pct{font-family:'IBM Plex Mono',monospace;}
+  body.rtl pre,body.rtl code,body.rtl .mono,body.rtl .kv{direction:ltr;text-align:left;unicode-bidi:isolate;}
+  body.rtl .pct{direction:ltr;}
+  body.rtl #langBtn{right:auto;left:24px;}
+  body.rtl .head-inner,body.rtl .step-title,body.rtl .note,body.rtl ul.tasks label,body.rtl .step-body p{text-align:right;}
+  body.rtl ul.tasks li{flex-direction:row;}
+</style>
+
+<script id="i18nScript">
+(function(){
+  // Plain-prose Arabic dictionary. Keys = normalised English text nodes.
+  // Anything NOT in here (and everything inside pre/code/.mono/.kv) stays English,
+  // so file names, config keys, DB placeholders, SQL, paths and URLs are never changed.
+  var DICT = {
+    // separators
+    "→":"←", ",":"،",
+    // header / chrome
+    "Production Deployment · Runbook":"النشر للإنتاج · دليل التشغيل",
+    "Texas Informative — Multi-Node Go-Live Plan":"Texas Informative — خطة الإطلاق متعددة العقد",
+    "Church Informative — Multi-Node Go-Live Plan":"Church Informative — خطة الإطلاق متعددة العقد",
+    "Source server":"الخادم المصدر",
+    "→ Live · 8 databases · 6 sites · Germany / Indonesia / Iraq / Malaysia / New Zealand / Singapore nodes":"← مباشر · 8 قواعد بيانات · 6 مواقع · عقد ألمانيا / إندونيسيا / العراق / ماليزيا / نيوزيلندا / سنغافورة",
+    "→ Live · 3 databases · 6 sites · Virgin Islands node":"← مباشر · 3 قواعد بيانات · 6 مواقع · عقدة جزر العذراء",
+    "Reset":"إعادة تعيين",
+    // intro note
+    "Before you start:":"قبل أن تبدأ:",
+    "take a full backup of the current live databases and the current live site folders. Run the data steps inside a transaction where possible, and verify row counts after each copy. Placeholders":"خذ نسخة احتياطية كاملة من قواعد البيانات الحية الحالية ومجلدات المواقع الحية الحالية. شغّل خطوات البيانات داخل معاملة (transaction) حيثما أمكن، وتحقق من عدد الصفوف بعد كل نسخ. العناصر النائبة",
+    "(restored DB) and":"(قاعدة البيانات المستعادة) و",
+    "(existing live DB you are migrating from) must be replaced with your real database names before running any SQL.":"(قاعدة البيانات الحية الحالية التي تنقل منها) يجب استبدالها بأسماء قواعد بياناتك الحقيقية قبل تشغيل أي SQL.",
+    // step titles + metas
+    "Export databases from source server":"تصدير قواعد البيانات من الخادم المصدر",
+    "live SQL instance":"نسخة SQL الحية",
+    "Restore all databases to the live server":"استعادة كل قواعد البيانات إلى الخادم الحي",
+    "source server":"الخادم المصدر",
+    "cutover delta":"فرق التحويل (cutover)",
+    "Clear transactional tables in the restored live DB":"تفريغ الجداول المعاملاتية في قاعدة البيانات الحية المستعادة",
+    "destructive":"تدميري",
+    "Generate a data script from the current live DB (other server)":"توليد سكربت بيانات من قاعدة البيانات الحية الحالية (خادم آخر)",
+    "Create the 6 sites in IIS on the live server":"إنشاء المواقع الستة في IIS على الخادم الحي",
+    "[SOURCE_SERVER] → live":"[SOURCE_SERVER] ← مباشر",
+    "Copy application folders to the live server":"نسخ مجلدات التطبيق إلى الخادم الحي",
+    "Copy last-month images & FileRepository (zip → copy → unzip)":"نسخ صور الشهر الأخير و FileRepository (ضغط ← نسخ ← فك ضغط)",
+    "manual":"يدوي",
+    "Create IIS virtual directories":"إنشاء الأدلة الافتراضية في IIS",
+    "Point Node Admin Panel at env vars":"توجيه Node Admin Panel إلى متغيرات البيئة",
+    "Point Node API at env vars":"توجيه Node API إلى متغيرات البيئة",
+    "Point Texas Admin Panel at env vars":"توجيه Texas Admin Panel إلى متغيرات البيئة",
+    "Point Church Admin Panel at env vars":"توجيه Church Admin Panel إلى متغيرات البيئة",
+    "Point Texas API at env vars":"توجيه Texas API إلى متغيرات البيئة",
+    "Point Church API at env vars":"توجيه Church API إلى متغيرات البيئة",
+    "Environment variables — all sensitive values":"متغيرات البيئة — كل القيم الحساسة",
+    "central":"مركزي",
+    "Post-deployment verification":"التحقق بعد النشر",
+    // step 1
+    "Take a":"خذ",
+    "backup (or generate scripts) for each of the 8 databases on":"نسخة احتياطية (أو ولّد سكربتات) لكل واحدة من قواعد البيانات الثماني على",
+    "backup (or generate scripts) for each of the 3 databases on":"نسخة احتياطية (أو ولّد سكربتات) لكل واحدة من قواعد البيانات الثلاث على",
+    "Export":"تصدير",
+    "Verify all 8 backup files are complete and transfer them to the live server":"تأكد من اكتمال ملفات النسخ الاحتياطي الثمانية وانقلها إلى الخادم الحي",
+    "Verify all 3 backup files are complete and transfer them to the live server":"تأكد من اكتمال ملفات النسخ الاحتياطي الثلاثة وانقلها إلى الخادم الحي",
+    // step 2
+    "Restore":"استعادة",
+    "Confirm DB users / logins are mapped and app login has access":"تأكد من ربط مستخدمي/حسابات الدخول لقاعدة البيانات وأن حساب التطبيق لديه صلاحية وصول",
+    // step 3
+    "Deletes are ordered":"عمليات الحذف مرتبة",
+    "child → parent":"من الفرع إلى الأصل",
+    "so foreign keys don't block them. Run inside a transaction.":"حتى لا تمنعها المفاتيح الخارجية. شغّلها داخل معاملة.",
+    "Step 3 — DELETE (run on [NEW_LIVE_DB])":"الخطوة 3 — DELETE (تُشغَّل على [NEW_LIVE_DB])",
+    "Reviewed row counts and committed the delete transaction":"راجعت عدد الصفوف وثبّتت معاملة الحذف",
+    // step 4
+    "The current live DB sits on a":"قاعدة البيانات الحية الحالية موجودة على",
+    "different server":"خادم مختلف",
+    ", so a cross-database":"، لذا فإن استعلام",
+    "can't reach it. Instead, use SSMS's":"عبر قواعد البيانات لا يمكنه الوصول إليها. بدلاً من ذلك، استخدم معالج",
+    "wizard to script the data of the 8 tables into a":"في SSMS لكتابة بيانات الجداول الثمانية في ملف",
+    "file of":"يحتوي على جُمَل",
+    "statements, then run that file on the live server.":"ثم شغّل هذا الملف على الخادم الحي.",
+    "A · Run the wizard on the SOURCE server":"أ · شغّل المعالج على الخادم المصدر",
+    "In SSMS, connect to the source server and expand":"في SSMS، اتصل بالخادم المصدر ووسّع",
+    "Right-click the database →":"انقر بزر الماوس الأيمن على قاعدة البيانات ←",
+    "→ on the intro page click":"← في الصفحة التعريفية اضغط",
+    "The 8 tables to tick (the wizard auto-includes":"الجداول الثمانية المطلوب تعليمها (يُدرج المعالج تلقائياً",
+    "for identity tables):":"لجداول الهوية):",
+    "Tables to select":"الجداول المطلوب اختيارها",
+    "B · Record source counts (for validation)":"ب · سجّل أعداد صفوف المصدر (للتحقق)",
+    "Run on the SOURCE server, DB = [CURRENT_LIVE_DB]":"تُشغَّل على الخادم المصدر، DB = [CURRENT_LIVE_DB]",
+    "Generated the":"ولّدت",
+    "data script and recorded source row counts":"سكربت البيانات وسجّلت أعداد صفوف المصدر",
+    "C · Transfer + run on the LIVE server":"ج · النقل + التشغيل على الخادم الحي",
+    "Copy the generated":"انسخ ملف",
+    "file to the live server":"المُولّد إلى الخادم الحي",
+    "Confirm Step 3 (clear tables) has already run on":"تأكد أن الخطوة 3 (تفريغ الجداول) شُغّلت بالفعل على",
+    "Open the file in SSMS connected to the live server; add":"افتح الملف في SSMS متصلاً بالخادم الحي؛ أضف",
+    "at the top (or pick it in the DB dropdown), then":"في الأعلى (أو اخترها من قائمة DB)، ثم",
+    "If foreign-key errors appear, wrap the run with the constraint toggle below (or reorder INSERT blocks parent→child)":"إذا ظهرت أخطاء مفاتيح خارجية، أحط التشغيل بمفتاح القيود أدناه (أو أعد ترتيب كتل INSERT من الأصل إلى الفرع)",
+    "Validate row counts on the live DB match the source counts from section B":"تحقق أن أعداد الصفوف في قاعدة البيانات الحية تطابق أعداد المصدر من القسم ب",
+    "Optional — disable / re-enable FK constraints around the run (on [NEW_LIVE_DB])":"اختياري — تعطيل / إعادة تفعيل قيود FK حول التشغيل (على [NEW_LIVE_DB])",
+    "Large tables / big files:":"الجداول الكبيرة / الملفات الكبيرة:",
+    "the Generate Scripts wizard can be slow and produce very large":"قد يكون معالج Generate Scripts بطيئاً ويُنتج ملفات",
+    "files. For high-row tables (e.g. attachments), the":"كبيرة جداً. للجداول كثيرة الصفوف (مثل المرفقات)،",
+    ", or a temporary":"، أو",
+    "linked server":"خادم مرتبط (linked server)",
+    "are faster alternatives. The end result is the same: data lands in":"بدائل أسرع. النتيجة النهائية واحدة: تهبط البيانات في",
+    // step 5
+    "Recreate the same 6 sites/links that exist on the source, on the live server:":"أعد إنشاء نفس المواقع/الروابط الستة الموجودة على المصدر، على الخادم الحي:",
+    "App pools, bindings (host/port/SSL) and .NET versions configured for each":"تهيئة تجمعات التطبيقات والارتباطات (المضيف/المنفذ/SSL) وإصدارات .NET لكل منها",
+    // step 6
+    "Verify file permissions (app pool identity needs read/write where applicable)":"تحقق من أذونات الملفات (هوية تجمّع التطبيق تحتاج قراءة/كتابة حيثما لزم)",
+    // step 7
+    "The databases are on":"قواعد البيانات موجودة على",
+    "different servers":"خوادم مختلفة",
+    ", so the physical files behind the data (uploaded images and contact/career attachments) move across by hand. On the current live server, grab the last month's files, zip them, copy the zip over, and unzip into the matching folder on the new server.":"، لذا تُنقل الملفات الفعلية خلف البيانات (الصور المرفوعة ومرفقات التواصل/التوظيف) يدوياً. على الخادم الحي الحالي، خذ ملفات الشهر الأخير، اضغطها، انسخ الملف المضغوط، وفك ضغطه في المجلد المطابق على الخادم الجديد.",
+    "A · Images — Texas Image Repository":"أ · الصور — Texas Image Repository",
+    "A · Images — Church Image Repository":"أ · الصور — Church Image Repository",
+    "B · FileRepository — contact + career attachments":"ب · FileRepository — مرفقات التواصل + التوظيف",
+    "On the":"على",
+    "current live server":"الخادم الحي الحالي",
+    ", open the":"، افتح",
+    "folder":"المجلد",
+    "Sort by":"رتّب حسب",
+    "(newest first) and select the files/folders from the":"(الأحدث أولاً) واختر الملفات/المجلدات من",
+    "last month":"الشهر الأخير",
+    "Right-click →":"انقر بزر الماوس الأيمن ←",
+    "→ name it e.g.":"← سمّه مثلاً",
+    "Copy the zip to the":"انسخ الملف المضغوط إلى",
+    "new server":"الخادم الجديد",
+    "and paste it into the":"والصقه في",
+    "there → confirm files merge into the right subfolders → delete the zip":"هناك ← تأكد من اندماج الملفات في المجلدات الفرعية الصحيحة ← احذف الملف المضغوط",
+    ", open":"، افتح",
+    "and select the":"واختر",
+    "files":"الملفات",
+    "Zip them → e.g.":"اضغطها ← مثلاً",
+    "and paste into":"والصقه في",
+    "there → confirm files land correctly → delete the zip":"هناك ← تأكد من وصول الملفات بشكل صحيح ← احذف الملف المضغوط",
+    "Spot-check: open a few recently-uploaded images and attachments on the new server":"فحص عيّنة: افتح بعض الصور والمرفقات المرفوعة حديثاً على الخادم الجديد",
+    "App-pool identity has read access to the extracted files":"هوية تجمّع التطبيق لديها صلاحية قراءة للملفات المُستخرَجة",
+    "Tip:":"نصيحة:",
+    "when extracting on the new server, keep the":"عند الاستخراج على الخادم الجديد، حافظ على",
+    "same folder structure":"نفس بنية المجلدات",
+    "as the source so paths still match what's stored in the database (the attachment paths in":"كما في المصدر حتى تظل المسارات مطابقة لما هو مخزّن في قاعدة البيانات (مسارات المرفقات في",
+    "must resolve). Extract":"يجب أن تُحَل). استخرج",
+    "into":"إلى داخل",
+    "the existing folder so files merge rather than landing in a new subfolder.":"المجلد الموجود حتى تندمج الملفات بدلاً من أن تهبط في مجلد فرعي جديد.",
+    // step 8
+    "→ virtual dir":"← دليل افتراضي",
+    "→ points to the":"← يشير إلى",
+    "→ points to":"← يشير إلى",
+    "Confirm each virtual dir resolves (browse a known file through it)":"تأكد أن كل دليل افتراضي يُحَل (تصفّح ملفاً معروفاً عبره)",
+    // steps 9-12 env pointers
+    "All sensitive values for this app are supplied via environment variables — listed in":"كل القيم الحساسة لهذا التطبيق تُوفَّر عبر متغيرات البيئة — مذكورة في",
+    "Step 13 · Environment variables":"الخطوة 13 · متغيرات البيئة",
+    ". This step just confirms the app reads them and nothing sensitive stays hardcoded.":". هذه الخطوة فقط تتأكد أن التطبيق يقرأها وألا يبقى شيء حساس مكتوباً بشكل ثابت.",
+    "All sensitive values come from":"كل القيم الحساسة تأتي من",
+    ". Only the non-sensitive":". فقط الإعدادات غير الحساسة",
+    "stay in":"تبقى في",
+    "Confirm":"تأكد من",
+    "and":"و",
+    "resolve from environment variables (Step 13)":"تُقرأ من متغيرات البيئة (الخطوة 13)",
+    "Remove any hardcoded connection string / links from":"أزل أي سلسلة اتصال / روابط مكتوبة بشكل ثابت من",
+    "Remove the matching plaintext values from":"أزل القيم النصية المطابقة من",
+    "Leave":"اترك",
+    "in":"في",
+    "(not sensitive)":"(غير حساسة)",
+    // step 13 env section
+    "Every connection string, internal link, file path, allowed origin and secret/code lives here as an":"كل سلسلة اتصال ورابط داخلي ومسار ملف وأصل مسموح وسر/رمز موجود هنا كـ",
+    "environment variable":"متغيّر بيئة",
+    "instead of being hardcoded in":"بدلاً من كتابته بشكل ثابت في",
+    ". .NET maps the double underscore":". يربط .NET الشرطة السفلية المزدوجة",
+    "to the config":"بترتيب",
+    "nesting. Fill the":"للإعداد. املأ",
+    "placeholders with the real live values on the server.":"العناصر النائبة بالقيم الحية الحقيقية على الخادم.",
+    "Set every variable below (machine-level, or per app pool — see tip)":"اضبط كل متغيّر أدناه (على مستوى الجهاز، أو لكل تجمّع تطبيقات — انظر النصيحة)",
+    "Restart each site / app pool so the variables are picked up":"أعد تشغيل كل موقع / تجمّع تطبيقات حتى يتم التقاط المتغيرات",
+    "Confirm no connection string, link or key remains hardcoded in source-controlled config":"تأكد ألا تبقى أي سلسلة اتصال أو رابط أو مفتاح مكتوباً بشكل ثابت في الإعدادات الخاضعة للتحكم بالمصدر",
+    "PowerShell — set machine-level (run as admin), then restart app pools":"PowerShell — اضبط على مستوى الجهاز (شغّل كمسؤول)، ثم أعد تشغيل تجمعات التطبيقات",
+    "web.config vs appsettings.json:":"web.config مقابل appsettings.json:",
+    "(ASP.NET Core) reads":"(ASP.NET Core) يقرأ",
+    "env vars automatically. The classic ASP.NET apps (Node Admin Panel, Node API, Texas Admin Panel) need the":"متغيرات البيئة تلقائياً. تطبيقات ASP.NET الكلاسيكية (Node Admin Panel, Node API, Texas Admin Panel) تحتاج",
+    "env vars automatically. The classic ASP.NET apps (Node Admin Panel, Node API, Church Admin Panel) need the":"متغيرات البيئة تلقائياً. تطبيقات ASP.NET الكلاسيكية (Node Admin Panel, Node API, Church Admin Panel) تحتاج",
+    "config builder (or read the env var in code) for":"أداة بناء الإعداد (أو اقرأ متغير البيئة في الكود) حتى يلتقطها",
+    "to pick them up. Either way you can scope a variable to one app via IIS":"حتى يلتقطها. على أي حال يمكنك حصر متغيّر بتطبيق واحد عبر IIS",
+    ", then recycle the pool.":"، ثم أعد تدوير التجمّع.",
+    // post-deploy
+    "All 6 sites load over their live bindings":"كل المواقع الستة تُحمّل عبر ارتباطاتها الحية",
+    "Images and file attachments resolve through the virtual directories":"الصور ومرفقات الملفات تُحَل عبر الأدلة الافتراضية",
+    "Admin panels connect to the correct live databases":"لوحات الإدارة تتصل بقواعد البيانات الحية الصحيحة",
+    "Contact Us + Career submissions write and read correctly":"إرساليات تواصل معنا + التوظيف تُكتب وتُقرأ بشكل صحيح",
+    "CORS works for all 6 front links; notifications + reCAPTCHA verified":"CORS يعمل لكل الروابط الأمامية الستة؛ تم التحقق من الإشعارات + reCAPTCHA",
+    "CORS works for the front link; notifications + reCAPTCHA verified":"CORS يعمل للرابط الأمامي؛ تم التحقق من الإشعارات + reCAPTCHA",
+    "Smoke test each node front-end (Germany / Indonesia / Iraq / Malaysia / NZ / Singapore)":"اختبار تشغيل سريع لواجهة كل عقدة (ألمانيا / إندونيسيا / العراق / ماليزيا / نيوزيلندا / سنغافورة)",
+    "Smoke test the node front-end (Virgin Islands)":"اختبار تشغيل سريع لواجهة العقدة (جزر العذراء)",
+    // footer
+    "Texas Informative · production runbook · check items as you go — progress saves locally in your browser":"Texas Informative · دليل تشغيل الإنتاج · علّم العناصر أثناء تقدّمك — يُحفظ التقدّم محلياً في متصفحك",
+    "Church Informative · production runbook · check items as you go — progress saves locally in your browser":"Church Informative · دليل تشغيل الإنتاج · علّم العناصر أثناء تقدّمك — يُحفظ التقدّم محلياً في متصفحك"
+  };
+
+  var SKIP = 'script,style,pre,code,.mono,.kv,.copy,.step-num,.chev,#pctText,#langBtn';
+  function norm(s){ return s.replace(/\s+/g,' ').trim(); }
+  function lead(s){ var m = s.match(/^\s*/); return m ? m[0] : ''; }
+  function trail(s){ var m = s.match(/\s*$/); return m ? m[0] : ''; }
+
+  // collect translatable text nodes once
+  var cache = [];
+  var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+    acceptNode: function(node){
+      if(!node.nodeValue || !norm(node.nodeValue)) return NodeFilter.FILTER_REJECT;
+      if(node.parentElement && node.parentElement.closest(SKIP)) return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    }
+  });
+  var n; while((n = walker.nextNode())){ cache.push({ node:n, orig:n.nodeValue }); }
+
+  function apply(lang){
+    cache.forEach(function(c){
+      if(lang === 'ar'){
+        var key = norm(c.orig);
+        if(Object.prototype.hasOwnProperty.call(DICT, key)){
+          c.node.nodeValue = lead(c.orig) + DICT[key] + trail(c.orig);
+        }
+      } else {
+        c.node.nodeValue = c.orig;
+      }
+    });
+    document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+    document.documentElement.setAttribute('lang', lang === 'ar' ? 'ar' : 'en');
+    document.body.classList.toggle('rtl', lang === 'ar');
+    btn.textContent = lang === 'ar' ? 'English' : 'العربية';
+    try { localStorage.setItem('runbook_lang', lang); } catch(e){}
+  }
+
+  // language toggle button
+  var btn = document.createElement('button');
+  btn.id = 'langBtn';
+  btn.type = 'button';
+  var current = 'en';
+  try { current = localStorage.getItem('runbook_lang') || 'en'; } catch(e){}
+  btn.addEventListener('click', function(){
+    current = (current === 'ar') ? 'en' : 'ar';
+    apply(current);
+  });
+  var hdr = document.querySelector('header.top');
+  if(hdr){ hdr.appendChild(btn); }
+  apply(current);
+})();
+</script>
 </body>
 </html>
