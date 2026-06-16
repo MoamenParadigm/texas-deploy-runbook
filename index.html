@@ -514,19 +514,32 @@ GO</pre>
     </div>
     <div class="step-body">
       <ul class="tasks">
-        <li><input type="checkbox"><label>Set <span class="mono">ExternalServicesUrls:Notifications</span> → live notification URL</label></li>
+        <li><input type="checkbox"><label>Set the Notifications URL as an <b>environment variable</b> (not in <span class="mono">appsettings.json</span>) — .NET maps the double underscore <span class="mono">__</span> to the JSON <span class="mono">:</span> nesting</label></li>
+        <li><input type="checkbox"><label>Restart the site / app pool so the new environment variable is picked up</label></li>
         <li><input type="checkbox"><label>Set <span class="mono">Recaptcha.Enabled = true</span>, <span class="mono">MinimumScore = 0.5</span></label></li>
       </ul>
       <div class="codeblock">
-        <div class="cap">Notifications + Recaptcha</div>
+        <div class="cap">Notifications — environment variable</div>
         <button class="copy">copy</button>
-<pre>"ExternalServicesUrls": {
-  "Notifications": "https://[NOTIFICATIONS_URL]"
-},
-"Recaptcha": {
+<pre># .NET binds ExternalServicesUrls__Notifications  ->  ExternalServicesUrls:Notifications
+ExternalServicesUrls__Notifications = https://[NOTIFICATIONS_URL]
+
+# PowerShell — set machine-level (run as admin), then restart the app pool:
+[Environment]::SetEnvironmentVariable(
+  "ExternalServicesUrls__Notifications",
+  "https://[NOTIFICATIONS_URL]",
+  "Machine")</pre>
+      </div>
+      <div class="codeblock">
+        <div class="cap">Recaptcha — appsettings.json</div>
+        <button class="copy">copy</button>
+<pre>"Recaptcha": {
   "Enabled": true,
   "MinimumScore": 0.5
 }</pre>
+      </div>
+      <div class="note" style="margin:16px 0 0">
+        <b>Tip:</b> to scope it to just this app instead of machine-wide, add the variable under the IIS <b>Application Pool → Advanced Settings → Environment Variables</b> (or in <span class="mono">web.config</span> via <span class="mono">&lt;environmentVariables&gt;</span> under <span class="mono">aspNetCore</span>), then recycle the pool.
       </div>
     </div>
   </section>
