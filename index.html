@@ -489,7 +489,7 @@ GO</pre>
         <li><input type="checkbox"><label><span class="mono">FileAttachmentSettings:ContactUsAttachmentsPath</span> = FileRepository server path</label></li>
         <li><input type="checkbox"><label><span class="mono">FileAttachmentSettings:CareerAttachmentsPath</span> = same FileRepository server path</label></li>
         <li><input type="checkbox"><label><span class="mono">AllowedOrigins</span> — add all 6 front links directly in <span class="mono">appsettings.json</span> (see block below)</label></li>
-        <li><input type="checkbox"><label><span class="mono">Recaptcha:SiteKey</span> and <span class="mono">Recaptcha:SecretKey</span> — from environment variables (Step 13)</label></li>
+        <li><input type="checkbox"><label><span class="mono">Recaptcha:SiteKey</span> and <span class="mono">Recaptcha:SecretKey</span> — loaded from the database per country (not set here)</label></li>
         <li><input type="checkbox"><label>Leave <span class="mono">Recaptcha.Enabled = true</span>, <span class="mono">MinimumScore = 0.5</span> in <span class="mono">appsettings.json</span> (not sensitive)</label></li>
         <li><input type="checkbox"><label><span class="mono">ExternalServicesUrls:Notifications</span> — from environment variable (Step 13)</label></li>
         <li><input type="checkbox"><label><span class="mono">JwtSettings:NotificationsKey</span> — from environment variable (Step 13)</label></li>
@@ -518,7 +518,7 @@ GO</pre>
     </div>
     <div class="step-body">
       <p style="color:var(--muted);font-size:14px;margin:10px 0 0">
-        Only the truly sensitive values are environment variables — connection strings, the Notifications URL and the reCAPTCHA keys. All other links, file paths and allowed origins stay hardcoded in <span class="mono">web.config</span> / <span class="mono">appsettings.json</span>. .NET maps the double underscore <span class="mono">__</span> to the config <span class="mono">:</span> nesting. Fill the <span class="mono">...</span> placeholders with the real live values on the server.
+        Only the truly sensitive values are environment variables — connection strings, the Notifications URL and the JWT notifications key. All other links, file paths and allowed origins stay hardcoded in <span class="mono">web.config</span> / <span class="mono">appsettings.json</span>. .NET maps the double underscore <span class="mono">__</span> to the config <span class="mono">:</span> nesting. Fill the <span class="mono">...</span> placeholders with the real live values on the server.
       </p>
       <ul class="tasks">
         <li><input type="checkbox"><label>Set every variable below (machine-level, or per app pool — see tip)</label></li>
@@ -549,8 +549,6 @@ GO</pre>
         <button class="copy">copy</button>
 <pre>ConnectionStrings__TexasInformativeDB = ...                 # live [DB_MAIN] connection string
 ExternalServicesUrls__Notifications   = https://[NOTIFICATIONS_URL]
-Recaptcha__SiteKey                    = ...                 # reCAPTCHA site key (code)
-Recaptcha__SecretKey                  = ...                 # reCAPTCHA secret key (code)
 JwtSettings__NotificationsKey         = ...                 # JWT notifications key (secret)</pre>
       </div>
 
@@ -562,8 +560,6 @@ JwtSettings__NotificationsKey         = ...                 # JWT notifications 
   "ConnectionStrings__DatabaseContainer"       = "..."
   "ConnectionStrings__TexasInformativeDB"      = "..."
   "ExternalServicesUrls__Notifications"        = "https://[NOTIFICATIONS_URL]"
-  "Recaptcha__SiteKey"                         = "..."
-  "Recaptcha__SecretKey"                       = "..."
   "JwtSettings__NotificationsKey"              = "..."
 }
 foreach ($k in $vars.Keys) {
@@ -913,7 +909,9 @@ foreach ($k in $vars.Keys) {
     "AllowedOrigins — in appsettings.json":"AllowedOrigins — في appsettings.json",
     "Environment variables — sensitive values only":"متغيرات البيئة — القيم الحساسة فقط",
     "Only the truly sensitive values are environment variables — connection strings, the Notifications URL and the reCAPTCHA keys. All other links, file paths and allowed origins stay hardcoded in":"القيم الحساسة فعلاً فقط هي متغيرات بيئة — سلاسل الاتصال ورابط الإشعارات ومفاتيح reCAPTCHA. كل الروابط الأخرى ومسارات الملفات والأصول المسموح بها تبقى مكتوبة بشكل ثابت في",
-    "Confirm no connection string or key remains hardcoded; links / paths / origins stay in config files":"تأكد ألا تبقى أي سلسلة اتصال أو مفتاح مكتوباً بشكل ثابت؛ الروابط / المسارات / الأصول تبقى في ملفات الإعداد"
+    "Confirm no connection string or key remains hardcoded; links / paths / origins stay in config files":"تأكد ألا تبقى أي سلسلة اتصال أو مفتاح مكتوباً بشكل ثابت؛ الروابط / المسارات / الأصول تبقى في ملفات الإعداد",
+    "— loaded from the database per country (not set here)":"— تُحمَّل من قاعدة البيانات لكل دولة (لا تُضبط هنا)",
+    "Only the truly sensitive values are environment variables — connection strings, the Notifications URL and the JWT notifications key. All other links, file paths and allowed origins stay hardcoded in":"القيم الحساسة فعلاً فقط هي متغيرات بيئة — سلاسل الاتصال ورابط الإشعارات ومفتاح إشعارات JWT. كل الروابط الأخرى ومسارات الملفات والأصول المسموح بها تبقى مكتوبة بشكل ثابت في"
   };
 
   var SKIP = 'script,style,pre,code,.mono,.kv,.copy,.step-num,.chev,#pctText,#langBtn';
