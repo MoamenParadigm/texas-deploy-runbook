@@ -492,6 +492,7 @@ GO</pre>
         <li><input type="checkbox"><label><span class="mono">Recaptcha:SiteKey</span> and <span class="mono">Recaptcha:SecretKey</span> — from environment variables (Step 13)</label></li>
         <li><input type="checkbox"><label>Leave <span class="mono">Recaptcha.Enabled = true</span>, <span class="mono">MinimumScore = 0.5</span> in <span class="mono">appsettings.json</span> (not sensitive)</label></li>
         <li><input type="checkbox"><label><span class="mono">ExternalServicesUrls:Notifications</span> — from environment variable (Step 13)</label></li>
+        <li><input type="checkbox"><label><span class="mono">JwtSettings:NotificationsKey</span> — from environment variable (Step 13)</label></li>
       </ul>
       <div class="codeblock">
         <div class="cap">AllowedOrigins — in appsettings.json</div>
@@ -549,7 +550,8 @@ GO</pre>
 <pre>ConnectionStrings__TexasInformativeDB = ...                 # live [DB_MAIN] connection string
 ExternalServicesUrls__Notifications   = https://[NOTIFICATIONS_URL]
 Recaptcha__SiteKey                    = ...                 # reCAPTCHA site key (code)
-Recaptcha__SecretKey                  = ...                 # reCAPTCHA secret key (code)</pre>
+Recaptcha__SecretKey                  = ...                 # reCAPTCHA secret key (code)
+JwtSettings__NotificationsKey         = ...                 # JWT notifications key (secret)</pre>
       </div>
 
       <div class="codeblock">
@@ -562,6 +564,7 @@ Recaptcha__SecretKey                  = ...                 # reCAPTCHA secret k
   "ExternalServicesUrls__Notifications"        = "https://[NOTIFICATIONS_URL]"
   "Recaptcha__SiteKey"                         = "..."
   "Recaptcha__SecretKey"                       = "..."
+  "JwtSettings__NotificationsKey"              = "..."
 }
 foreach ($k in $vars.Keys) {
   [Environment]::SetEnvironmentVariable($k, $vars[$k], "Machine")
